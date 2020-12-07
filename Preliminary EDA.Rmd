@@ -1,0 +1,63 @@
+---
+title: "Stat 184 Final Project (Preliminary EDA)"
+author: "Jessica Dougherty"
+date: "Due Nov. 15th"
+output: html_notebook
+---
+
+Guiding Question: What social media platforms do each political party use most frequently?
+Sub-question: Which social media platform does each party have a bigger following on? 
+
+This data source is from the Pew Research Center. Pew Research Center collected all of the Facebook posts and tweets posted by all official and unofficial account maintained by every voting member of the U.S. Senate and House of Representatives between Jan. 1, 2015, and May 31, 2020. This data was originally collected to study political rhetoric and attempt to build a continually updated database of political social media activity across platforms such as Facebook and Twitter. One case is one member of congress's social media stats. This includes party affiliation, number of followers, posts, average reactions, average shares, etc. There are 1078 cases in the data set. I plan to use the variables platform, party, total posts, average favorites, likes, retweets, and shares. I would like to note that in the data Independents are associated with the party they caucused with for the majority of the study period, but identified with parentheses. I will be considering them as the party they caucused with for the purpose of this assignment.
+
+For my second data set, I am using a set from the same study by Pew Research Center. This data set looks at the percentage change of social media activity when big events occur. It looks at the top ten events for both parties. Some of the variables include date, party affiliation, percentage change of likes/shares on Facebook/Twitter, etc. It is kept and updated via the same pollster and study.
+
+Load packages
+```{r}
+library(ggplot2)
+library(tidyverse)
+```
+
+Import Data Sets
+```{r}
+library(readxl)
+Social_media_statistics_for_members_of_the_116th_Congress <- read_excel("Social media statistics for members of the 116th Congress.xlsx", 
+    skip = 1)
+View(Social_media_statistics_for_members_of_the_116th_Congress)
+
+library(readr)
+Top_10_events_associated_with_increased_engagement_in_each_party <- read_csv("appendix csvs/Top 10 events associated with increased engagement in each party.csv")
+View(Top_10_events_associated_with_increased_engagement_in_each_party)
+```
+
+Summary Stats
+```{r}
+smStats <- Social_media_statistics_for_members_of_the_116th_Congress
+View(smStats)
+
+smStats%>%
+  summarise(n = n(), meanLikes = mean(`Average Post Favorites/Reactions`), meanShares = mean(`Average Post Retweets/Shares`))
+```
+
+Boxplot of Favorites/Reactions
+```{r}
+ggplot(data = smStats, aes(x = adjParty, y = `Average Post Favorites/Reactions`)) + geom_boxplot()+scale_y_continuous(limits = c(0, 1000))
+```
+
+Boxplot of Retweets/Shares
+```{r}
+ggplot(data = smStats, aes(x=adjParty, y=`Average Post Retweets/Shares`)) + geom_boxplot() + scale_y_continuous(limits = c(0, 300))
+```
+
+Second Data Set Summary Stats
+```{r}
+topTen <- Top_10_events_associated_with_increased_engagement_in_each_party
+View(topTen)
+
+topTen%>%
+  group_by(Party)%>%
+  summarise(n=n(), meanChangeFBLikes = mean(`Percentage Change in Facebook Reactions`),
+            meanChangeFBShares = mean(`Percentage Change in Facebook Shares`),
+            meanChangeTwitRt = mean(`Percentage Change in Twitter Retweets`),
+            meanChangeTwitFav = mean(`Percentage Change in Twitter Favorites`))
+```
