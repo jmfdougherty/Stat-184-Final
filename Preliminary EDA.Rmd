@@ -5,8 +5,7 @@ date: "Due Dec. 13th"
 output: html_notebook
 ---
 
-Guiding Question: What social media platforms do each political party use most frequently?
-Sub-question: Which social media platform does each party have a bigger following on? 
+Guiding Question: Which social media platform does each party have a bigger following on? 
 
 This data source is from the Pew Research Center. Pew Research Center collected all of the Facebook posts and tweets posted by all official and unofficial account maintained by every voting member of the U.S. Senate and House of Representatives between Jan. 1, 2015, and May 31, 2020. This data was originally collected to study political rhetoric and attempt to build a continually updated database of political social media activity across platforms such as Facebook and Twitter. One case is one member of congress's social media stats. This includes party affiliation, number of followers, posts, average reactions, average shares, etc. There are 1078 cases in the data set. I plan to use the variables platform, party, total posts, average favorites, likes, retweets, and shares. I would like to note that in the data Independents are associated with the party they caucused with for the majority of the study period, but identified with parentheses. I will be considering them as the party they caucused with for the purpose of this assignment.
 
@@ -16,6 +15,7 @@ Load packages
 ```{r}
 library(ggplot2)
 library(tidyverse)
+library(DataComputing)
 ```
 
 Import Data Sets
