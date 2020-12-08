@@ -73,4 +73,60 @@ Democrat Stats
 ```{r}
 Dem <- smStats%>%
   filter(adjParty == "D")
+
+DemStats <- Dem%>%
+  group_by(Platform)%>%
+  summarise(n = n(), avgFollowers = mean(`Max Total Followers`), avgTotPosts = mean(`Total Posts`), avgFav = mean(`Average Post Favorites/Reactions`), avgShare = mean(`Average Post Retweets/Shares`))
 ```
+
+Republican Stats
+```{r}
+GOP <- smStats%>%
+  filter(adjParty == "R")
+
+GOPStats <- GOP%>%
+  group_by(Platform)%>%
+  summarise(n = n(), avgFollowers = mean(`Max Total Followers`, na.rm = TRUE), avgTotPosts = mean(`Total Posts`), avgFav = mean(`Average Post Favorites/Reactions`), avgShare = mean(`Average Post Retweets/Shares`))
+```
+
+
+```{r}
+PartyPlatforms <- smStats%>%
+  group_by(adjParty, Platform)%>%
+  summarise(n = n(), avgFollowers = mean(`Max Total Followers`, na.rm = TRUE), avgTotPosts = mean(`Total Posts`), avgFav = mean(`Average Post Favorites/Reactions`), avgShare = mean(`Average Post Retweets/Shares`))
+```
+
+Average Favorites/Likes Graph
+```{r}
+ggplot(data = PartyPlatforms, aes(x = adjParty, y = avgFav)) +
+  geom_bar(stat= 'identity', position= 'dodge', width=.9) +
+  facet_wrap(~Platform, ncol=3) +
+  ggtitle("Average Favorites/Likes among members of Congress") +
+  xlab("Party Affiliation") +
+  ylab("Average")
+```
+As you can see, Democrats on average get more favorites and likes on both platforms. The engagement on Twitter is much higher than Facebook. The gap between the two parties for Facebook is not too big. 
+
+Average Shares/Retweets Graph
+```{r}
+ggplot(data = PartyPlatforms, aes(x = adjParty, y = avgShare)) +
+  geom_bar(stat = 'identity', position = 'dodge', width = .9) +
+  facet_wrap(~Platform, ncol=3) +
+  ggtitle("Average Shares/Retweets among members of Congress") + 
+  xlab("Party Affiliation") + 
+  ylab("Average")
+```
+
+On Facebook, Republican's have a slight lead in Facebook shares. However, Democrats still have more average Twitter retweets than Republicans. Again, we see a larger amount of Twitter engangement than Facebook. 
+
+Average Number of Followers
+```{r}
+ggplot(data = PartyPlatforms, aes(x = adjParty, y = avgFollowers)) +
+  geom_bar(stat = "identity", position = "dodge", width = .9) +
+  facet_wrap(~Platform,ncol=3) +
+  ggtitle("Average Number of Followers") +
+  xlab("Party Affiliation") +
+  ylab("Average")
+```
+
+Both parties are pretty even when looking at Facebook followers, althought Republicans do have a slight lead. However, Democrats have a large lead in Twitter followers. 
