@@ -1,7 +1,7 @@
 ---
-title: "Stat 184 Final Project (Preliminary EDA)"
+title: "Stat 184 Final Project"
 author: "Jessica Dougherty"
-date: "Due Nov. 15th"
+date: "Due Dec. 13th"
 output: html_notebook
 ---
 
@@ -39,15 +39,21 @@ smStats%>%
   summarise(n = n(), meanLikes = mean(`Average Post Favorites/Reactions`), meanShares = mean(`Average Post Retweets/Shares`))
 ```
 
+Over all 1078 members of congress in this study, the average number of likes or reactions they recieve is 641. The average number of shares in 162. For reference, in 2013 Kim Kardashian recieved about 600 retweets within 50 minutes of posting something. This is not a lot of likes or shares for a "famous person". 
+
 Boxplot of Favorites/Reactions
 ```{r}
 ggplot(data = smStats, aes(x = adjParty, y = `Average Post Favorites/Reactions`)) + geom_boxplot()+scale_y_continuous(limits = c(0, 1000))
 ```
 
+Looking at this box plot of favorites and reactions among congress, the two parties are pretty similar numberwise. However, there is a slightly bigger range for the republican party. It is also interesting to note that there are a few democrats who's average favorites/reacts are higher than the highest republican.
+
 Boxplot of Retweets/Shares
 ```{r}
 ggplot(data = smStats, aes(x=adjParty, y=`Average Post Retweets/Shares`)) + geom_boxplot() + scale_y_continuous(limits = c(0, 300))
 ```
+
+In terms of retweets and shares, the two parties seem to look pretty even. Again, the republican's have a bigger range, but not by much. 
 
 Second Data Set Summary Stats
 ```{r}
@@ -60,4 +66,11 @@ topTen%>%
             meanChangeFBShares = mean(`Percentage Change in Facebook Shares`),
             meanChangeTwitRt = mean(`Percentage Change in Twitter Retweets`),
             meanChangeTwitFav = mean(`Percentage Change in Twitter Favorites`))
+```
+For this data set, we see the mean percent change in likes, shares, retweets, and favorites only fluxuate by less than 4%. However, when you look at the raw data set, the democrat's highest percetage is 12.617 (Twitter Favorites) while the republican's is 9.625 (FB Shares). 
+
+Democrat Stats
+```{r}
+Dem <- smStats%>%
+  filter(adjParty == "D")
 ```
