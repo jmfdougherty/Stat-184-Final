@@ -1,0 +1,98 @@
+---
+title: "STAT 184 Final Project"
+name: "Jessica Dougherty"
+due date: "December 13th, 2020"
+output: html_notebook
+---
+
+The first data set is from the Pew Research Center. Pew collected all the Facebook posts and tweets posted by official and unofficial accounts maintained by every voting member of the U.S. Senate and House of Representatives between Jan. 1, 2015, and May 31, 2020. This data was originally collected to study political rhetoric and attempt to build a continually updated database of political social media activity across platforms such as Facebook and Twitter. One case equates to one member of congress's social media stats. This includes party affiliation, number of followers, posts, average reactions, average shares, etc. There are 1078 cases in the data set. I plan to use the variables platform, party, total posts, average favorites, likes, retweets, and shares. I would like to note that in the data Independents are associated with the party they caucused with for the majority of the study period, but identified with parentheses. I will be considering them as the party they caucused with for the purpose of this assignment. This is show in the column adjParty.
+
+For my second data set, I am using another data set from the same study by Pew Research Center. This data set looks at the percentage change for social media activity of congress members associated with 100 terms. It looks at the top 100 terms for both parties. Some of the variables include party affiliation, number of tweets/Facebook posts including the term, and percentage change of likes/shares on Facebook/Twitter, etc. It is kept and updated via the same pollster.
+
+My guiding question is **"Which social media does each party have a bigger following on?"**. I will be measuring this by looking at the average number of followers and engagement among Twitter and Facebook. Another way I will measure this is by looking at the standard deviations for each party. This is important because there could be a situation where a few larger accounts skew the average. I believe another important relationship to look at is between the number of followers and average engagement on posts. Using all of these different factors, I believe we can confidently draw a conclusion. 
+
+####Loading packages
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(DataComputing)
+library(readr)
+```
+
+####Load Data Sets
+```{r}
+hundredTerms <- read_csv("appendix csvs/Top 100 terms associated with engagement boosts in each party.csv")
+smStats <- read_csv("appendix csvs/Social media statistics for members of the 116th Congress.csv")
+```
+
+####Inspect Data Sets
+```{r}
+glimpse(hundredTerms)
+glimpse(smStats)
+```
+
+####Creating adjParty variable (explained above)
+```{r}
+smStats <- smStats %>%
+  mutate(adjParty = ifelse(Party %in% c("(R)", "R"), "R", "D"))
+```
+
+####Creating a table of summary statistics for our primary data set; this will help us get a general understanding of the spread of this data. (Note: there is one NULL that I have removed)
+```{r}
+primarySummary <- smStats%>%
+  group_by(adjParty, Platform)%>%
+  summarise(n = n(), avgFollowers = mean(`Max Total Followers`, na.rm = TRUE), avgLikes = mean(`Average Post Favorites/Reactions`), avgShares = mean(`Average Post Retweets/Shares`), sdFollowers = sd(`Max Total Followers`, na.rm = TRUE), sdLikes = sd(`Average Post Favorites/Reactions`), sdShares = sd(`Average Post Retweets/Shares`), maxFollowers = max(`Max Total Followers`, na.rm = TRUE), minFollowers = min(`Max Total Followers`, na.rm = TRUE), seFollowers = 2*(sdFollowers/sqrt(n())))
+```
+
+####Plotting the difference in means with confidence intervals for followers
+```{r}
+ggplot(primarySummary, aes(x = adjParty, y = avgFollowers, color = Platform)) +
+  geom_errorbar(aes(ymin = avgFollowers-seFollowers, ymax = avgFollowers + seFollowers, width = .1)) +
+  geom_point() +
+  scale_x_discrete(labels = c("Democrats", "Republicans")) +
+  labs(title = "Max Number of Followers", subtitle = "by Platform and Party", y = "Max Number of Followers", caption = "Source: Pew Research Center", x = NULL)
+```
+
+Looking at these confidence intervals, we get a good visualization of the spread of followers among each platform and party. While the average for Facebook is about the same, the interval for Republicans is much bigger. On the other hand, the means for Twitter followers are very different. The Democrats have a much larger following on Twitter than the Republicans. Facebook is mostly used by an older demographic, compared to Twitter. This could play a role in the gap. 
+
+Now I will wrangle the data into two data sets: facebook and twitter. This will help me answer my guiding question.
+
+####Facebook data:
+```{r}
+Facebook <- smStats%>%
+  filter(Platform == "facebook")
+glimpse(Facebook)
+```
+
+####Twitter data:
+```{r}
+Twitter <- smStats%>%
+  filter(Platform == "twitter")
+glimpse(Twitter)
+```
+
+Using the two data frames I just created, I will make 2 scatter graphs comparing number of followers to a ratio of shares/likes or retweets/favorites. (Note: to make the graph readable I had to exclude ~100 outliers in each graph)
+
+####Facebook:
+```{r}
+ggplot(Facebook, aes(x = (`Average Post Retweets/Shares`/`Average Post Favorites/Reactions`), y = `Max Total Followers`)) + 
+  geom_point() +
+  scale_y_continuous(limits = c(0, 75000)) +
+  scale_x_continuous(limits = c(0, .61)) +
+  labs(title = "Facebook Followers vs Reactions/Shares", x = "Average Number of Shares/Reactions", y = "Number of Followers") +
+  facet_wrap(~adjParty) +
+  geom_smooth(method=lm , color="black", se=TRUE)
+```
+
+####Twitter:
+```{r}
+ggplot(Twitter, aes(x = (`Average Post Retweets/Shares`/`Average Post Favorites/Reactions`), y = `Max Total Followers`)) + 
+  geom_point() +
+  scale_y_continuous(limits = c(0, 80000)) +
+  scale_x_continuous(limits = c(.1, .6)) +
+  labs(title = "Twitter Followers vs Retweets/Favorites", x = "Average Number of Retweets/Favorites", y = "Number of Followers") +
+  facet_wrap(~adjParty) +
+  geom_smooth(method=lm , color="black", se=TRUE)
+```
+
+In the Facebook graph, we can see there is some difference between the Democrats and Republicans by looking at their correlation lines. However, there is nothing substantial. For Twitter, there is no correlation between the two variables nor any substantial observations to be made. 
