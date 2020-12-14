@@ -9,7 +9,7 @@ The first data set is from the Pew Research Center. Pew collected all the Facebo
 
 For my second data set, I am using another data set from the same study by Pew Research Center. This data set looks at the percentage change for social media activity of congress members associated with 100 terms. It looks at the top 100 terms for both parties. Some of the variables include party affiliation, number of tweets/Facebook posts including the term, and percentage change of likes/shares on Facebook/Twitter, etc. It is kept and updated via the same pollster.
 
-My guiding question is **"Which social media does each party have a bigger following on?"**. I will be measuring this by looking at the average number of followers and engagement among Twitter and Facebook. Another way I will measure this is by looking at the standard deviations for each party. This is important because there could be a situation where a few larger accounts skew the average. I believe another important relationship to look at is between the number of followers and average engagement on posts. Using all of these different factors, I believe we can confidently draw a conclusion. 
+My guiding question is **"Which social media does each party have more engagement on?"**. One way I will measure this is by looking at the means and confidence intervals for each party and platforms follower count. This is important because there could be a situation where a few larger accounts skew the average, so I would like to see the spread. I believe another important relationship to look at is between the number of followers and average engagement on posts. Using all of these different factors, I believe we can confidently draw a conclusion. 
 
 ####Loading packages
 ```{r}
@@ -29,6 +29,14 @@ smStats <- read_csv("appendix csvs/Social media statistics for members of the 11
 ```{r}
 glimpse(hundredTerms)
 glimpse(smStats)
+```
+
+####Investigating data further
+```{r}
+wideSM<- smStats%>%
+  group_by(adjParty, Platform)%>%
+  summarise(n = n())%>%
+  spread(key = adjParty, value = n, fill = 0)
 ```
 
 ####Creating adjParty variable (explained above)
@@ -95,4 +103,32 @@ ggplot(Twitter, aes(x = (`Average Post Retweets/Shares`/`Average Post Favorites/
   geom_smooth(method=lm , color="black", se=TRUE)
 ```
 
-In the Facebook graph, we can see there is some difference between the Democrats and Republicans by looking at their correlation lines. However, there is nothing substantial. For Twitter, there is no correlation between the two variables nor any substantial observations to be made. 
+In the Facebook graph, we can see there is some difference between the Democrats and Republicans, however there is nothing substantial. For Twitter, there is no correlation between the two variables. This tells us that follower count is not a good indicator of engagement for Twitter. 
+
+Since followers could be a better indicator for Facebook, let's do a side-by-side bar chart to settle who has a bigger following on this platform.
+
+####Bar graph of Facebook followers
+```{r}
+ggplot(data = Facebook, aes(x = adjParty, y = mean(`Max Total Followers`))) +
+  geom_bar(stat = "identity", position = "dodge", width = .5) +
+  labs(title = "Max Facebook Followers", x = "Party Affiliation", y = "Number of Followers")
+```
+
+Comparing the two side by side, there is no significant difference between the average number of followers between the two parties. Therefore, **both parties have a equal engagement on Facebook**. 
+
+To determine who has a bigger engagement on Twitter, I will compare the number of posts to the ratio of retweets to favorites. This will show how active they are on the platform and how much engagement they recieve.
+
+####Twitter Plot
+```{r}
+ggplot(data = Twitter, aes(x = (`Average Post Retweets/Shares`/`Average Post Favorites/Reactions`), y = `Total Posts`)) +
+  geom_point() +
+  geom_smooth(method=lm , color="black", se=TRUE) + 
+  facet_wrap(~adjParty) +
+  scale_y_continuous(limits = c(0, 10000)) +
+  scale_x_continuous(limits = c(0.1, 0.6)) +
+  labs(title = "Total Posts vs Average Retweets/Favorites", x = "Average Retweets/Favorites")
+```
+
+From this plot you can see, although slight, line of best fit for the Democrats is higher than the Republicans. From this measure, **the Democrat's have higher engagment on Twitter than the Republicans**.
+
+To conclude, althought there was no clear correlation, from the graphs derived from the data sets we can say that Democrats have slightly higher engagement on Twitter than Republicans. There is no difference in engagement on Facebook. For further investigation, I would be intrigued to see the breakdown of follower demographic for top congressmen. From prior knowledge, I know that Twitter and Facebook's main demographics are different, so it would be interesting to see just how different they are. 
